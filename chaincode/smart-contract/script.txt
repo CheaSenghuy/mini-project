@@ -1,0 +1,128 @@
+
+type SmartContract struct{
+	contractapi.Contract
+}
+
+type Asset struct{
+	ID string `json:id`
+	Name string `json:name`
+}
+
+func (s *SmartContract) InitLedger (ctx contractapi.TransationContextInterface) error {
+	asset := Asset[
+		{
+			ID: 1 , Name:"Huy"
+		},
+		{
+			ID:2 , Name:"Yuji"
+		}
+
+	for _,asset = range assets {
+		assetJson,err= json.Marshal(asset)
+			if err !=nil{
+				return nil
+			}
+		err = ctx.GetSub().PutState(asset.ID,assetJSON)
+		if err !=nil {
+			return "cant not put in world state"
+		}
+	}
+	return nil
+	]
+}
+
+func (s *SmartContract) ReadAsset (ctx contractapi.TransactionContextInterface,id string) error{
+	assetJson ,_ :=ctx.GetSub().GetState(id)
+	var asset Asset
+	err = json.Unmarshal(assetJson,&asset)
+	if err !=nil 
+		return nil,err
+	
+	return &asset ,err
+}
+
+func (s *SmartContract) CreateAsset (ctx contractapi.TransactionContextInterfacel,id string,name string) error{
+	asset := Asset{
+		ID: id,
+		Name: name,
+	}
+
+	assetJSon,_ := json.Marshal(asset)
+
+	return ctx.GetSub().PutState(id,assetJson)
+}
+
+
+func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface, id string) error {
+	return ctx.GetSub().DelState(id)
+}
+
+func (s *SmartContract) UpdateAsset (ctx contractapi.TransactionContextInterface,id string, newName string) error {
+
+	asset , err := s.ReadAsset(ctx, id)
+		if err != nil{
+			return nil
+		}
+	
+	asset.Name=newName
+
+	assetJson,_ :=json.Marshal(asset)
+
+	return ctx.getSub().PutState(id,assetJson)
+}
+
+func (s *SmartContract) ReadAllAsset (ctx contractapi.TransacctionContextInterface) error{ 
+	res := ctx.getSub().GetStateByRange("","")
+	defer res.close()
+
+	var assets []*Asset
+	for res.Next(){
+		query,_ := res.Next()
+
+		var asset Asset
+		err=json.Unmarshal(query.Value, &asset)
+		if err !=nil{
+			return nil,err
+		}
+		assets=append(assets,asset)
+}
+return assets , nil
+}
+
+
+
+cryptogen --output="crypto-config" --config=${PWD}/crypto-config.yaml
+
+configtxgen -profile profile -outputBlock ./artfacts/genesis.block -channelID genesis -configPath=${PWD}/config
+
+configtxgen -profile profile -outputCreateChannelTx ./artfacts/channel.tx -channelID mychannel -configPath=${PWD}/config
+
+configtxgen -profile profile -outputAnchorPeerUpdate ./artfacts/anchorPeer1.tx -channelID mychannel -asOrg Org1 -configPath=${PWD}/config
+
+
+orderer start 
+
+peer channel create -o localhost:7050 -f ./artfacts/channel.tx -outputBlock ./artfacts/mychannel.block -c mychannel
+
+docker run -e COUCHDB_USER=admin -e COUCHDB_PASSWORD=123 --name couchdb -d couchdb 
+
+peer node start
+
+peer channel join -b ./artfacts/mychannel.block
+
+peer channel update -o localhost:7050 -c mychannel -f ./artifacts/anchorPeer1.tx 
+
+peer lifecycle install basic.tar.gz
+
+peer lifecycle package basic.tar.gz --lang golang --path ./chaincode --label basic 
+
+peer lifecycle checkcommitreadiness 
+
+peer lifecycle commit 
+
+peer lifecycle querycommitted 
+
+peer chaincode invoke 
+
+peer cha
+
